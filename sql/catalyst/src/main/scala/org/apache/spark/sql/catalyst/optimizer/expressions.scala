@@ -340,7 +340,7 @@ object LikeSimplification extends Rule[LogicalPlan] {
  * equivalent [[Literal]] values. This rule is more specific with
  * Null value propagation from bottom to top of the expression tree.
  */
-object NullPropagation extends Rule[LogicalPlan] {
+case class NullPropagation(conf: CatalystConf) extends Rule[LogicalPlan] {
   private def nonNullLiteral(e: Expression): Boolean = e match {
     case Literal(null, _) => false
     case _ => true
