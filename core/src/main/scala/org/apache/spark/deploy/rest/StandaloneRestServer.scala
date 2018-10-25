@@ -62,6 +62,8 @@ private[deploy] class StandaloneRestServer(
     new StandaloneKillRequestServlet(masterEndpoint, masterConf)
   protected override val statusRequestServlet =
     new StandaloneStatusRequestServlet(masterEndpoint, masterConf)
+  protected override val listRequestServlet =
+    new StandaloneListRequestServlet(masterEndpoint, masterConf)
 }
 
 /**
@@ -101,6 +103,28 @@ private[rest] class StandaloneStatusRequestServlet(masterEndpoint: RpcEndpointRe
     d.workerHostPort = response.workerHostPort.orNull
     d.message = message.orNull
     d
+  }
+}
+
+/**
+ * A servlet for handling list requests passed to the [[StandaloneRestServer]].
+ */
+private[rest] class StandaloneListRequestServlet(masterEndpoint: RpcEndpointRef, conf: SparkConf)
+  extends ListQueuedDriversRequestServlet {
+
+  protected def handleList(): ListQueuedDriversResponse = {
+    // val response = masterEndpoint.askSync[DeployMessages.ListQueuedDriversResponse](
+    //  DeployMessages.RequestQueuedDriverList())
+    // val message = response.exception.map { s"Exception from the cluster:\n" + formatException(_) }
+    // val d = new SubmissionStatusResponse
+    // d.serverSparkVersion = sparkVersion
+    // d.submissionId = submissionId
+    // d.success = response.found
+    // d.driverState = response.state.map(_.toString).orNull
+    // d.workerId = response.workerId.orNull
+    // d.workerHostPort = response.workerHostPort.orNull
+    // d.message = message.orNull
+    new ListQueuedDriversResponse
   }
 }
 

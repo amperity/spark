@@ -54,6 +54,7 @@ private[spark] abstract class RestSubmissionServer(
   protected val submitRequestServlet: SubmitRequestServlet
   protected val killRequestServlet: KillRequestServlet
   protected val statusRequestServlet: StatusRequestServlet
+  protected val listRequestServlet: ListQueuedDriversRequestServlet
 
   private var _server: Option[Server] = None
 
@@ -63,6 +64,7 @@ private[spark] abstract class RestSubmissionServer(
     s"$baseContext/create/*" -> submitRequestServlet,
     s"$baseContext/kill/*" -> killRequestServlet,
     s"$baseContext/status/*" -> statusRequestServlet,
+    s"$baseContext/queued" -> listRequestServlet,
     "/*" -> new ErrorServlet // default handler
   )
 
@@ -249,6 +251,24 @@ private[rest] abstract class StatusRequestServlet extends RestServlet {
 }
 
 /**
+ * A servlet for handling driver list requests passed to the [[RestSubmissionServer]].
+ */
+private[rest] abstract class ListQueuedDriversRequestServlet extends RestServlet {
+
+  protected override def doGet(
+      request: HttpServletRequest,
+      response: HttpServletResponse): Unit = {
+
+    logInfo(s"Got list request")
+    val responseMessage = handleList()
+    sendResponse(responseMessage, response)
+  }
+
+  protected def handleList(): ListQueuedDriversResponse
+}
+
+
+/**
  * A servlet for handling submit requests passed to the [[RestSubmissionServer]].
  */
 private[rest] abstract class SubmitRequestServlet extends RestServlet {
@@ -309,7 +329,7 @@ private class ErrorServlet extends RestServlet {
           "Missing the /submissions prefix."
         case `serverVersion` :: "submissions" :: tail =>
           // http://host:port/correct-version/submissions/*
-          "Missing an action: please specify one of /create, /kill, or /status."
+          "Missing an action: please specify one of /create, /kill, /queued or /status."
         case unknownVersion :: tail =>
           // http://host:port/unknown-version/*
           versionMismatch = true

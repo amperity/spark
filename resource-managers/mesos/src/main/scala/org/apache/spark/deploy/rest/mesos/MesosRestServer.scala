@@ -50,6 +50,8 @@ private[spark] class MesosRestServer(
     new MesosKillRequestServlet(scheduler, masterConf)
   protected override val statusRequestServlet =
     new MesosStatusRequestServlet(scheduler, masterConf)
+  protected override val listRequestServlet =
+    new MesosListRequestServlet(scheduler, masterConf)
 }
 
 private[mesos] class MesosSubmitRequestServlet(
@@ -157,5 +159,14 @@ private[mesos] class MesosStatusRequestServlet(scheduler: MesosClusterScheduler,
     val d = scheduler.getDriverStatus(submissionId)
     d.serverSparkVersion = sparkVersion
     d
+  }
+}
+
+private[mesos] class MesosListRequestServlet(scheduler: MesosClusterScheduler, conf: SparkConf)
+  extends ListQueuedDriversRequestServlet {
+  protected override def handleList(): ListQueuedDriversResponse = {
+    val ds = scheduler.listQueuedDrivers()
+    ds.serverSparkVersion = sparkVersion
+    ds
   }
 }

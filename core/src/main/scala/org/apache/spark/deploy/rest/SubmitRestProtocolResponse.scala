@@ -72,6 +72,17 @@ private[spark] class SubmissionStatusResponse extends SubmitRestProtocolResponse
 }
 
 /**
+ * A response to a list request in the REST application submission protocol.
+ */
+private[spark] class ListQueuedDriversResponse extends SubmitRestProtocolResponse {
+  var drivers: Array[Serializable] = null
+
+  protected override def doValidate(): Unit = {
+    super.doValidate()
+  }
+}
+
+/**
  * An error response message used in the REST application submission protocol.
  */
 private[rest] class ErrorResponse extends SubmitRestProtocolResponse {

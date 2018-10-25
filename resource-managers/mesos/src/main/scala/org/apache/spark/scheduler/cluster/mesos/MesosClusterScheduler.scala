@@ -32,7 +32,7 @@ import org.apache.mesos.Protos.TaskStatus.Reason
 import org.apache.spark.{SecurityManager, SparkConf, SparkException, TaskState}
 import org.apache.spark.deploy.mesos.MesosDriverDescription
 import org.apache.spark.deploy.mesos.config
-import org.apache.spark.deploy.rest.{CreateSubmissionResponse, KillSubmissionResponse, SubmissionStatusResponse}
+import org.apache.spark.deploy.rest.{CreateSubmissionResponse, KillSubmissionResponse, SubmissionStatusResponse, ListQueuedDriversResponse}
 import org.apache.spark.metrics.MetricsSystem
 import org.apache.spark.util.Utils
 
@@ -262,6 +262,20 @@ private[spark] class MesosClusterScheduler(
         .orElse(pendingRetryDrivers.find(_.submissionId.equals(submissionId))
           .map(d => new MesosDriverState("RETRYING", d)))
     }
+  }
+
+  def listQueuedDrivers(): ListQueuedDriversResponse = {
+    val ds = new ListQueuedDriversResponse
+    if (!ready) {
+      ds.success = false
+      ds.message = "Scheduler is not ready to take requests"
+      return ds
+    }
+    stateLock.synchronized {
+      ds.drivers = queuedDrivers.toArray
+      ds.success = true
+    }
+    ds
   }
 
   private def isQueueFull(): Boolean = launchedDrivers.size >= queuedCapacity

@@ -593,6 +593,7 @@ private class FaultyStandaloneRestServer(
   protected override val submitRequestServlet = new MalformedSubmitServlet
   protected override val killRequestServlet = new InvalidKillServlet
   protected override val statusRequestServlet = new ExplodingStatusServlet
+  protected override val listRequestServlet = new LimpingListServlet
 
   /** A faulty servlet that produces malformed responses. */
   class MalformedSubmitServlet
@@ -621,6 +622,16 @@ private class FaultyStandaloneRestServer(
       val s = super.handleStatus(submissionId)
       s.workerId = explode.toString
       s
+    }
+  }
+
+  /** A faulty list servlet that explodes. */
+  class LimpingListServlet extends StandaloneListRequestServlet(masterEndpoint, masterConf) {
+    private def explode: Int = 1 / 0
+    protected override def handleList(): ListQueuedDriversResponse = {
+      val ds = super.handleList()
+      ds.success = ( 0 == 0 )
+      ds
     }
   }
 }
