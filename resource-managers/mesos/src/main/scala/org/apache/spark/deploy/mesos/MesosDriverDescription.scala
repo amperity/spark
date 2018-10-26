@@ -19,6 +19,7 @@ package org.apache.spark.deploy.mesos
 
 import java.util.Date
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.apache.spark.SparkConf
 import org.apache.spark.deploy.Command
 import org.apache.spark.scheduler.cluster.mesos.MesosClusterRetryState
@@ -41,13 +42,15 @@ private[spark] class MesosDriverDescription(
     val cores: Double,
     val supervise: Boolean,
     val command: Command,
-    schedulerProperties: Map[String, String],
+    val schedulerProperties: Map[String, String],
     val submissionId: String,
     val submissionDate: Date,
     val retryState: Option[MesosClusterRetryState] = None)
   extends Serializable {
 
+  @JsonIgnore
   val conf = new SparkConf(false)
+
   schedulerProperties.foreach {case (k, v) => conf.set(k, v)}
 
   def copy(
