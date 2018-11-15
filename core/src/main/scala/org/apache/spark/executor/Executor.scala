@@ -32,6 +32,8 @@ import scala.util.control.NonFatal
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 
+import org.apache.log4j.MDC
+//import org.slf4j.{MDC => slf4jMDC}
 import org.apache.spark._
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.internal.Logging
@@ -58,6 +60,12 @@ private[spark] class Executor(
     isLocal: Boolean = false,
     uncaughtExceptionHandler: UncaughtExceptionHandler = SparkUncaughtExceptionHandler)
   extends Logging {
+
+  logInfo(s"MDC putting spark.app.id and spark.executor.id $executorId")
+
+  MDC.put("spark.app.id", env.conf.get("spark.app.id", "no-app-id"))
+  MDC.put("spark.executor.id", executorId)
+  logInfo("MDC context: " + MDC.getContext.toString)
 
   logInfo(s"Starting executor ID $executorId on host $executorHostname")
 

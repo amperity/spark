@@ -49,6 +49,8 @@ private[deploy] class DriverRunner(
     val securityManager: SecurityManager)
   extends Logging {
 
+  // TODO do the same thing here?
+
   @volatile private var process: Option[Process] = None
   @volatile private var killed = false
 
