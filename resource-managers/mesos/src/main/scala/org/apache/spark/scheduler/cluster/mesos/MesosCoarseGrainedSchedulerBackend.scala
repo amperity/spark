@@ -323,38 +323,6 @@ private[spark] class MesosCoarseGrainedSchedulerBackend(
     }
   }
 
-  override def declineOffer(
-      d: org.apache.mesos.SchedulerDriver,
-      offer: Offer,
-      reason: Option[String] = None,
-      refuseSeconds: Option[Long] = None): Unit = {
-
-    val id = offer.getId.getValue
-    val offerAttributes = toAttributeMap(offer.getAttributesList)
-    val mem = getResource(offer.getResourcesList, "mem")
-    val cpus = getResource(offer.getResourcesList, "cpus")
-    val ports = getRangeResource(offer.getResourcesList, "ports")
-    val unavailabilityStart = if (offer.hasUnavailability) {
-      Option(new Date(offer.getUnavailability.getStart.getNanoseconds / 1000000L).toString)
-    } else {
-      None
-    }
-
-    logDebug(
-      s"Declining offer: $id with attributes: $offerAttributes mem: $mem" +
-      s" cpu: $cpus port: $ports" +
-      unavailabilityStart.map(" unavailability start: " + _).getOrElse("") +
-      s" for $refuseSeconds seconds" +
-      reason.map(r => s" (reason: $r)").getOrElse(""))
-
-    refuseSeconds match {
-      case Some(seconds) =>
-        val filters = Filters.newBuilder().setRefuseSeconds(seconds).build()
-        d.declineOffer(offer.getId, filters)
-      case _ => d.declineOffer(offer.getId)
-    }
-  }
-
   /**
    * Launches executors on accepted offers, and declines unused offers. Executors are launched
    * round-robin on offers.

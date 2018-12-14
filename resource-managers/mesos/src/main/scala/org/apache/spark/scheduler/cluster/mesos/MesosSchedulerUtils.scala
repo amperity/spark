@@ -556,12 +556,18 @@ trait MesosSchedulerUtils extends Logging {
     val mem = getResource(offer.getResourcesList, "mem")
     val cpus = getResource(offer.getResourcesList, "cpus")
     val ports = getRangeResource(offer.getResourcesList, "ports")
+    val unavailabilityStart = if (offer.hasUnavailability) {
+      Option(new Date(offer.getUnavailability.getStart.getNanoseconds / 1000000L).toString)
+    } else {
+      None
+    }
 
     logDebug(s"Declining offer: $id with " +
       s"attributes: $offerAttributes " +
       s"mem: $mem " +
       s"cpu: $cpus " +
       s"port: $ports " +
+      unavailabilityStart.map(" unavailability start: " + _).getOrElse("") +
       refuseSeconds.map(s => s"for ${s} seconds ").getOrElse("") +
       reason.map(r => s" (reason: $r)").getOrElse(""))
 

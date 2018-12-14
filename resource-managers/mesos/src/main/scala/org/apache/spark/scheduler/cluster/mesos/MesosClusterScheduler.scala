@@ -131,6 +131,8 @@ private[spark] class MesosClusterScheduler(
   private val retainedDrivers = conf.getInt("spark.mesos.retainedDrivers", 200)
   private val maxRetryWaitTime = conf.getInt("spark.mesos.cluster.retry.wait.max", 60) // 1 minute
   private val useFetchCache = conf.getBoolean("spark.mesos.fetchCache.enable", false)
+  private val minUnavailabilityThreshold =
+    conf.getTimeAsMs("spark.mesos.unavailabilityThreshold", "0")
   private val schedulerState = engineFactory.createEngine("scheduler")
   private val stateLock = new Object()
   private val finishedDrivers =
@@ -509,7 +511,7 @@ private[spark] class MesosClusterScheduler(
   }
 
   private class ResourceOffer(
-      val offer: Offer,
+      var offer: Offer,
       var remainingResources: JList[Resource],
       var attributes: JList[Attribute]) {
     override def toString(): String = {
@@ -553,12 +555,13 @@ private[spark] class MesosClusterScheduler(
       val driverMem = submission.mem
       val driverConstraints =
         parseConstraintString(submission.conf.get(config.DRIVER_CONSTRAINTS))
-      logTrace(s"Finding offer to launch driver with cpu: $driverCpu, mem: $driverMem, " +
+      logDebug(s"Finding offer to launch driver with cpu: $driverCpu, mem: $driverMem, " +
         s"driverConstraints: $driverConstraints")
       val offerOption = currentOffers.find { offer =>
         getResource(offer.remainingResources, "cpus") >= driverCpu &&
         getResource(offer.remainingResources, "mem") >= driverMem &&
-        matchesAttributeRequirements(driverConstraints, toAttributeMap(offer.attributes))
+        matchesAttributeRequirements(driverConstraints, toAttributeMap(offer.attributes)) &&
+        matchesUnavailabilityRequirements(minUnavailabilityThreshold, offer.offer)
       }
       if (offerOption.isEmpty) {
         logDebug(s"Unable to find offer to launch driver id: ${submission.submissionId}, " +
@@ -569,7 +572,7 @@ private[spark] class MesosClusterScheduler(
         try {
           val task = createTaskInfo(submission, offer)
           queuedTasks += task
-          logTrace(s"Using offer ${offer.offer.getId.getValue} to launch driver " +
+          logDebug(s"Using offer ${offer.offer.getId.getValue} to launch driver " +
             submission.submissionId)
           val newState = new MesosClusterSubmissionState(
             submission,
