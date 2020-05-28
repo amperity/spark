@@ -1559,6 +1559,17 @@ object SQLConf {
         "turning the flag on provides a way for these sources to see these partitionBy columns.")
       .booleanConf
       .createWithDefault(false)
+
+  val MAX_PLAN_STRING_LENGTH = buildConf("spark.sql.maxPlanStringLength")
+    .doc("Maximum number of characters to output for a plan string.  If the plan is " +
+      "longer, further output will be truncated.  The default setting always generates a full " +
+      "plan.  Set this to a lower value such as 8k if plan strings are taking up too much " +
+      "memory or are causing OutOfMemory errors in the driver or UI processes.")
+    .bytesConf(ByteUnit.BYTE)
+    .checkValue(i => i >= 0 && i <= ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH, "Invalid " +
+      "value for 'spark.sql.maxPlanStringLength'.  Length must be a valid string length " +
+      "(nonnegative and shorter than the maximum size).")
+    .createWithDefault(ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
 }
 
 /**
@@ -1965,6 +1976,8 @@ class SQLConf extends Serializable with Logging {
     getConf(SQLConf.LEGACY_REPLACE_DATABRICKS_SPARK_AVRO_ENABLED)
 
   def setOpsPrecedenceEnforced: Boolean = getConf(SQLConf.LEGACY_SETOPS_PRECEDENCE_ENABLED)
+
+  def maxPlanStringLength: Int = getConf(SQLConf.MAX_PLAN_STRING_LENGTH).toInt
 
   /** ********************** SQLConf functionality methods ************ */
 
