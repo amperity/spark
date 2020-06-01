@@ -43,4 +43,12 @@ class StringUtilsSuite extends SparkFunSuite {
     assert(filterPattern(names, " a. ") === Seq("a1", "a2"))
     assert(filterPattern(names, " d* ") === Nil)
   }
+
+  test("StringConcat doesn't overflow on many inputs") {
+    val concat = new StringConcat(maxLength = 100)
+    0.to(Integer.MAX_VALUE).foreach { _ =>
+      concat.append("hello world")
+    }
+    assert(concat.toString.length === 100)
+  }
 }
