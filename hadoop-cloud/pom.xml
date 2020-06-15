@@ -20,13 +20,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apache.spark</groupId>
-    <artifactId>spark-parent_2.11</artifactId>
-    <version>2.4.4</version>
+    <groupId>amperity</groupId>
+    <artifactId>spark-parent_2.12</artifactId>
+    <version>2.4.4-amperity1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-hadoop-cloud_2.11</artifactId>
+  <artifactId>spark-hadoop-cloud_2.12</artifactId>
   <packaging>jar</packaging>
   <name>Spark Project Cloud Integration through Hadoop Libraries</name>
   <description>
@@ -46,13 +46,13 @@
   <dependencies>
     <!--used during compilation but not exported as transitive dependencies-->
     <dependency>
-      <groupId>org.apache.spark</groupId>
+      <groupId>amperity</groupId>
       <artifactId>spark-sql_${scala.binary.version}</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.spark</groupId>
+      <groupId>amperity</groupId>
       <artifactId>spark-core_${scala.binary.version}</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>

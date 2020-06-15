@@ -20,13 +20,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apache.spark</groupId>
-    <artifactId>spark-parent_2.11</artifactId>
-    <version>2.4.4</version>
+    <groupId>amperity</groupId>
+    <artifactId>spark-parent_2.12</artifactId>
+    <version>2.4.4-amperity1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-tags_2.11</artifactId>
+  <artifactId>spark-tags_2.12</artifactId>
   <packaging>jar</packaging>
   <name>Spark Project Tags</name>
   <url>http://spark.apache.org/</url>
